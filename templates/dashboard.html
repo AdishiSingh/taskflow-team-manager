@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% from '_macros.html' import stat_card %}
+
+{% block title %}Dashboard - TaskFlow{% endblock %}
+
+{% block extra_css %}{% endblock %}
+
+{% block content %}
+<div class="welcome-banner welcome-banner-compact">
+    <div class="row align-items-center g-2">
+        <div class="col-lg-7">
+            <span class="page-badge">Welcome back</span>
+            <h2 class="welcome-title">Hello, {{ current_user.name.split()[0] }} 👋</h2>
+            <p class="welcome-sub mb-0">Your productivity command center</p>
+        </div>
+        <div class="col-lg-5 text-lg-end">
+            {% if current_user.role == 'admin' %}
+            <span class="role-banner role-banner-admin"><i class="bi bi-shield-check"></i> Admin Access — Full control</span>
+            {% else %}
+            <span class="role-banner role-banner-member"><i class="bi bi-eye"></i> Member View — Assigned tasks only</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-3 stat-row">
+    <div class="col-6 col-xl-3">{{ stat_card('Total Tasks', total_tasks, 'bi-list-task', 'primary', 'Tracked') }}</div>
+    <div class="col-6 col-xl-3">{{ stat_card('Completed', completed_tasks, 'bi-check-circle-fill', 'success', 'Done') }}</div>
+    <div class="col-6 col-xl-3">{{ stat_card('In Progress', in_progress_tasks, 'bi-lightning-charge-fill', 'warning', 'Active') }}</div>
+    <div class="col-6 col-xl-3">{{ stat_card('Overdue', overdue_tasks, 'bi-alarm-fill', 'danger', 'Urgent') }}</div>
+</div>
+
+{# Analytics & Charts #}
+<div class="section-label mb-2"><i class="bi bi-pie-chart-fill"></i> Analytics</div>
+<div class="row g-3 mb-3">
+    <div class="col-lg-4">
+        <div class="card-modern chart-card h-100">
+            <div class="card-header-modern py-2">
+                <h6 class="card-title mb-0"><i class="bi bi-pie-chart text-primary me-1"></i> Task Status</h6>
+            </div>
+            <div class="card-body chart-body-compact">
+                <canvas id="statusDoughnutChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-modern chart-card h-100">
+            <div class="card-header-modern py-2">
+                <h6 class="card-title mb-0"><i class="bi bi-bar-chart text-success me-1"></i> Status Breakdown</h6>
+            </div>
+            <div class="card-body chart-body-compact">
+                <canvas id="statusBarChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card-modern chart-card h-100">
+            <div class="card-header-modern py-2">
+                <h6 class="card-title mb-0"><i class="bi bi-flag text-warning me-1"></i> Priority Mix</h6>
+            </div>
+            <div class="card-body chart-body-compact">
+                <canvas id="priorityChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-modern mb-3 progress-card-compact">
+    <div class="card-body py-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h6 class="card-title mb-0"><i class="bi bi-graph-up-arrow text-primary me-1"></i> Completion Rate</h6>
+            <span class="fw-bold text-primary">{{ completion_percentage }}%</span>
+        </div>
+        <div class="progress progress-modern">
+            <div class="progress-bar" role="progressbar" style="width: {{ completion_percentage }}%;" aria-valuenow="{{ completion_percentage }}"></div>
+        </div>
+        <small class="text-muted">{{ completed_tasks }} / {{ total_tasks }} tasks completed</small>
+    </div>
+</div>
+
+<div class="row g-3 mb-3">
+    {# Activity Timeline #}
+    <div class="col-lg-5">
+        <div class="card-modern h-100">
+            <div class="card-header-modern py-2 d-flex justify-content-between align-items-center">
+                <h6 class="card-title mb-0"><i class="bi bi-activity text-primary me-1"></i> Activity Timeline</h6>
+                <span class="badge bg-primary bg-opacity-10 text-primary">Live</span>
+            </div>
+            <div class="card-body py-2 activity-feed">
+                {% if activity_feed %}
+                    {% for item in activity_feed %}
+                    <div class="activity-item activity-item-{{ item.color }}">
+                        <div class="activity-icon"><i class="bi {{ item.icon }}"></i></div>
+                        <div class="activity-content">
+                            <p class="activity-message mb-0">{{ item.message | safe }}</p>
+                            <small class="activity-detail">{{ item.detail }} · {{ item.time_label }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted small text-center py-3 mb-0">No recent activity</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {# Recent + Upcoming compact #}
+    <div class="col-lg-7">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="card-modern h-100">
+                    <div class="card-header-modern py-2">
+                        <h6 class="card-title mb-0"><i class="bi bi-clock-history me-1"></i> Recent Tasks</h6>
+                    </div>
+                    <div class="card-body py-2 compact-list">
+                        {% if recent_tasks %}
+                            {% for task in recent_tasks %}
+                            <a href="{{ url_for('project.detail', project_id=task.project_id) }}" class="list-item-compact">
+                                <span class="list-item-compact-title">{{ task.title }}</span>
+                                <span class="badge badge-pill badge-status badge-status-{{ task.status | lower | replace(' ', '-') }}">{{ task.status }}</span>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small text-center py-2 mb-0">No tasks</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card-modern h-100">
+                    <div class="card-header-modern py-2">
+                        <h6 class="card-title mb-0"><i class="bi bi-calendar-event me-1"></i> Deadlines</h6>
+                    </div>
+                    <div class="card-body py-2 compact-list">
+                        {% if upcoming_tasks %}
+                            {% for task in upcoming_tasks %}
+                            <a href="{{ url_for('project.detail', project_id=task.project_id) }}" class="list-item-compact">
+                                <span class="list-item-compact-title">{{ task.title }}</span>
+                                <span class="list-item-compact-date">{{ task.due_date.strftime('%b %d') }}</span>
+                            </a>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted small text-center py-2 mb-0">None upcoming</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if overdue_task_list %}
+<div class="card-modern mb-3 border-danger border-opacity-25">
+    <div class="card-header-modern py-2 bg-danger bg-opacity-10">
+        <h6 class="card-title text-danger mb-0"><i class="bi bi-exclamation-octagon me-1"></i> Overdue</h6>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive table-responsive-modern">
+            <table class="table table-modern table-compact mb-0" id="overdueTable">
+                <thead><tr><th>Task</th><th>Project</th><th>Due</th><th>Status</th></tr></thead>
+                <tbody>
+                    {% for task in overdue_task_list %}
+                    <tr class="row-overdue searchable-row" data-search="{{ task.title | lower }} {{ task.project.name | lower }}">
+                        <td data-label="Task">{{ task.title }}</td>
+                        <td data-label="Project">{{ task.project.name }}</td>
+                        <td data-label="Due">{{ task.due_date.strftime('%Y-%m-%d') }}</td>
+                        <td data-label="Status"><span class="badge badge-pill badge-status badge-status-{{ task.status | lower | replace(' ', '-') }}">{{ task.status }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card-modern">
+    <div class="card-header-modern py-2 d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h6 class="card-title mb-0"><i class="bi bi-folder2-open me-1"></i> Project Progress</h6>
+        <div class="search-box search-box-sm">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control" id="projectProgressSearch" placeholder="Filter projects..." aria-label="Search projects">
+        </div>
+    </div>
+    <div class="card-body py-2">
+        {% if project_stats %}
+        <div class="table-responsive">
+            <table class="table table-modern table-compact mb-0" id="projectProgressTable">
+                <thead class="sticky-thead">
+                    <tr><th>Project</th><th>Total</th><th>Done</th><th>Progress</th></tr>
+                </thead>
+                <tbody>
+                    {% for stat in project_stats %}
+                    <tr class="searchable-row" data-search="{{ stat.name | lower }}">
+                        <td class="fw-semibold" data-label="Project">{{ stat.name }}</td>
+                        <td data-label="Total">{{ stat.total }}</td>
+                        <td data-label="Done">{{ stat.completed }}</td>
+                        <td data-label="Progress">
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress progress-modern flex-grow-1" style="min-width:80px">
+                                    <div class="progress-bar" style="width: {{ stat.percentage }}%;" aria-valuenow="{{ stat.percentage }}"></div>
+                                </div>
+                                <span class="small fw-semibold">{{ stat.percentage }}%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="text-muted small text-center py-3 mb-0">No projects yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<script type="application/json" id="dashboard-chart-data">{{ chart_data | tojson }}</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

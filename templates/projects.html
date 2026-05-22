@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% from '_macros.html' import empty_state %}
+
+{% block title %}Projects - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <span class="page-badge">Workspace</span>
+        <h1 class="page-title">Projects</h1>
+        <p class="page-subtitle">Manage and track all your team initiatives</p>
+        {% if current_user.role == 'member' %}
+        <span class="badge badge-pill mt-2" style="background:rgba(37,99,235,0.1);color:var(--primary);">
+            <i class="bi bi-lock me-1"></i> View-only — assigned projects
+        </span>
+        {% endif %}
+    </div>
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+        {% if projects %}
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input type="search" class="form-control" id="projectListSearch" placeholder="Search projects..." aria-label="Search projects">
+        </div>
+        {% endif %}
+        {% if current_user.role == 'admin' %}
+        <a href="{{ url_for('project.create') }}" class="btn btn-primary btn-modern">
+            <i class="bi bi-plus-lg"></i> New Project
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+{% if projects %}
+<div class="row g-3">
+    {% for project in projects %}
+    <div class="col-md-6 col-xl-4 project-search-item" data-search="{{ project.name | lower }} {{ (project.description or '') | lower }}">
+        <div class="card-modern project-card hover-lift">
+            <div class="card-body py-3">
+                <div class="d-flex justify-content-between align-items-start mb-1">
+                    <h5 class="fw-bold mb-0 fs-6">{{ project.name }}</h5>
+                    <span class="badge badge-pill bg-primary bg-opacity-10 text-primary">{{ project.get_completion_percentage() }}%</span>
+                </div>
+                <p class="text-muted small mb-2">{{ (project.description or '')[:80] }}{% if project.description and project.description|length > 80 %}...{% endif %}</p>
+                <div class="project-card-meta mb-2">
+                    <span><i class="bi bi-person"></i> {{ project.creator.name }}</span>
+                    <span><i class="bi bi-people"></i> {{ project.members|length }}</span>
+                    <span><i class="bi bi-list-check"></i> {{ project.tasks|length }}</span>
+                </div>
+                <div class="progress progress-modern mb-2" style="height:6px">
+                    <div class="progress-bar" style="width: {{ project.get_completion_percentage() }}%;" aria-valuenow="{{ project.get_completion_percentage() }}"></div>
+                </div>
+                <a href="{{ url_for('project.detail', project_id=project.id) }}" class="btn btn-primary btn-modern btn-sm w-100">
+                    View Project <i class="bi bi-arrow-right ms-1"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="card-modern">
+    <div class="card-body">
+        {% if current_user.role == 'admin' %}
+        {{ empty_state('bi-folder-plus', 'No projects yet', 'Create your first project and start collaborating.', url_for('project.create'), 'Create Project') }}
+        {% else %}
+        {{ empty_state('bi-hourglass-split', 'No projects assigned', 'Ask an administrator to add you to a team.', '', '') }}
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

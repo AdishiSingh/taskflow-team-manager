@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Edit' if project else 'Create' }} Project - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="form-card-wide">
+    <div class="page-header mb-4">
+        <div>
+            <span class="page-badge">Project</span>
+            <h1 class="page-title">{{ 'Edit' if project else 'Create' }} Project</h1>
+            <p class="page-subtitle">{{ 'Update project details' if project else 'Set up a new workspace for your team' }}</p>
+        </div>
+    </div>
+    
+    <div class="card-modern">
+        <div class="card-body p-4">
+            <form method="POST" action="{% if project %}{{ url_for('project.edit', project_id=project.id) }}{% else %}{{ url_for('project.create') }}{% endif %}">
+                <div class="mb-3">
+                    <label for="name" class="form-label">Project Name</label>
+                    <div class="input-group-modern">
+                        <span class="input-icon"><i class="bi bi-folder"></i></span>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ name if name else (project.name if project else '') }}" placeholder="e.g. AI Resume Analyzer" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4" placeholder="What is this project about?">{{ description if description else (project.description if project else '') }}</textarea>
+                </div>
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary btn-modern">
+                        <i class="bi bi-check-lg"></i> {{ 'Update' if project else 'Create' }} Project
+                    </button>
+                    <a href="{% if project %}{{ url_for('project.detail', project_id=project.id) }}{% else %}{{ url_for('project.list') }}{% endif %}" 
+                       class="btn btn-outline-modern">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

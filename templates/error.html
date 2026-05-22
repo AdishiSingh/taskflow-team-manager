@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}Error {{ error_code }} - TaskFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6">
+        <div class="card-modern text-center">
+            <div class="card-body py-5 px-4">
+                <div class="empty-state-icon mx-auto mb-4" style="background: rgba(239,68,68,0.1); color: var(--accent-danger);">
+                    <i class="bi bi-{% if error_code == 404 %}search{% elif error_code == 403 %}shield-exclamation{% else %}bug{% endif %}"></i>
+                </div>
+                <div class="error-code-display mb-2">{{ error_code }}</div>
+                <h3 class="fw-bold mb-2">{{ error_message }}</h3>
+                <p class="text-muted mb-4">
+                    {% if error_detail %}{{ error_detail }}
+                    {% elif error_code == 404 %}The page you're looking for doesn't exist or was moved.
+                    {% elif error_code == 403 %}You don't have permission to access this resource.
+                    {% else %}Something went wrong. Please try again later.
+                    {% endif %}
+                </p>
+                <div class="d-flex gap-2 justify-content-center flex-wrap">
+                    <a href="{{ url_for('dashboard.index') if current_user.is_authenticated else url_for('index') }}" class="btn btn-primary btn-modern">
+                        <i class="bi bi-house"></i> Go Home
+                    </a>
+                    {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('project.list') }}" class="btn btn-outline-modern">
+                        <i class="bi bi-folder2"></i> Projects
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

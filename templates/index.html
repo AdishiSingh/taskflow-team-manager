@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block title %}TaskFlow — Team Task Manager{% endblock %}
+
+{% block content %}
+<section class="hero-section">
+    <span class="page-badge">Productivity Platform</span>
+    <h1>Ship work faster with TaskFlow</h1>
+    <p class="lead text-muted mx-auto" style="max-width: 560px;">
+        A modern team task manager for collaborative projects, smart assignments, and real-time progress tracking.
+    </p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap mt-4">
+        <a href="{{ url_for('auth.signup') }}" class="btn btn-primary btn-modern btn-lg">
+            <i class="bi bi-rocket-takeoff"></i> Get Started Free
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="btn btn-outline-modern btn-lg">Sign In</a>
+    </div>
+</section>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-6">
+        <div class="card-modern hover-lift h-100">
+            <div class="card-body feature-card">
+                <div class="feature-icon feature-icon-primary"><i class="bi bi-kanban"></i></div>
+                <h3>Manage Projects</h3>
+                <p class="text-muted">Organize work into projects, invite teammates, and track completion with beautiful dashboards.</p>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-modern">Explore Projects</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card-modern hover-lift h-100">
+            <div class="card-body feature-card">
+                <div class="feature-icon feature-icon-success"><i class="bi bi-check2-square"></i></div>
+                <h3>Track Tasks</h3>
+                <p class="text-muted">Assign tasks, set priorities, meet deadlines, and never lose sight of what matters.</p>
+                <a href="{{ url_for('auth.login') }}" class="btn btn-modern text-white" style="background: var(--accent-success);">Start Tracking</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card-modern mb-4">
+    <div class="card-body py-5">
+        <h3 class="text-center fw-bold mb-4">Built for modern teams</h3>
+        <div class="row g-4">
+            <div class="col-md-4 text-center">
+                <div class="feature-icon feature-icon-primary mx-auto mb-3"><i class="bi bi-people-fill"></i></div>
+                <h5 class="fw-semibold">Team Collaboration</h5>
+                <p class="text-muted small mb-0">Work together on shared projects with role-based access.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="feature-icon feature-icon-success mx-auto mb-3"><i class="bi bi-graph-up-arrow"></i></div>
+                <h5 class="fw-semibold">Progress Tracking</h5>
+                <p class="text-muted small mb-0">Visual dashboards and progress bars at a glance.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="feature-icon mx-auto mb-3" style="background: rgba(245,158,11,0.12); color: var(--accent-warning);"><i class="bi bi-shield-lock-fill"></i></div>
+                <h5 class="fw-semibold">Secure Roles</h5>
+                <p class="text-muted small mb-0">Admin and member permissions built in.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

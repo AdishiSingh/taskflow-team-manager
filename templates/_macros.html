@@ -1,0 +1,58 @@
+{# Reusable UI components for SaaS-style layouts #}
+
+{% macro initials(name) -%}
+{%- set parts = name.split() -%}
+{{- parts[0][0] | upper -}}
+{%- if parts | length > 1 -%}{{- parts[-1][0] | upper -}}{%- endif -%}
+{%- endmacro %}
+
+{% macro avatar(name, size='md') %}
+<div class="avatar avatar-{{ size }}" aria-hidden="true">{{ initials(name) }}</div>
+{% endmacro %}
+
+{% macro page_header(title, subtitle='', badge='') %}
+<div class="page-header mb-4">
+    <div>
+        {% if badge %}<span class="page-badge">{{ badge }}</span>{% endif %}
+        <h1 class="page-title">{{ title }}</h1>
+        {% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}
+    </div>
+    {% if caller %}<div class="page-header-actions">{{ caller() }}</div>{% endif %}
+</div>
+{% endmacro %}
+
+{% macro stat_card(label, value, icon, variant='primary', trend='') %}
+<div class="stat-card stat-card-{{ variant }}">
+    <div class="stat-card-icon"><i class="bi {{ icon }}"></i></div>
+    <div class="stat-card-body">
+        <span class="stat-card-label">{{ label }}</span>
+        <span class="stat-card-value">{{ value }}</span>
+        {% if trend %}<span class="stat-card-trend">{{ trend }}</span>{% endif %}
+    </div>
+</div>
+{% endmacro %}
+
+{% macro empty_state(icon, title, message, btn_url='', btn_text='') %}
+<div class="empty-state">
+    <div class="empty-state-icon"><i class="bi {{ icon }}"></i></div>
+    <h3>{{ title }}</h3>
+    <p>{{ message }}</p>
+    {% if btn_url and btn_text %}
+    <a href="{{ btn_url }}" class="btn btn-primary btn-modern">{{ btn_text }}</a>
+    {% endif %}
+</div>
+{% endmacro %}
+
+{% macro form_field_icon(icon) %}
+<span class="input-icon"><i class="bi {{ icon }}"></i></span>
+{% endmacro %}
+
+{% macro badge_status(status) %}
+<span class="badge badge-pill badge-status badge-status-{{ status | lower | replace(' ', '-') }}">
+    <i class="bi bi-circle-fill me-1"></i>{{ status }}
+</span>
+{% endmacro %}
+
+{% macro badge_priority(priority) %}
+<span class="badge badge-pill badge-priority badge-priority-{{ priority | lower }}">{{ priority }}</span>
+{% endmacro %}
